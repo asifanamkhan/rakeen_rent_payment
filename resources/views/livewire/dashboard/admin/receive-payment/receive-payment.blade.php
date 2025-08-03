@@ -1,14 +1,13 @@
 <div>
-    <div wire:loading class="spinner-border text-primary custom-loading" >
+    <div wire:loading class="spinner-border text-primary custom-loading" user="status">
         <span class="sr-only">Loading...</span>
     </div>
     <div style="display: flex; justify-content: space-between; align-items:center">
-        <h3 style="padding: 0px 5px 10px 5px;">
-            <i class="fas fa-dollar-sign"></i> Receive Payments</h3>
+        <h3 style="padding: 0px 5px 10px 5px;">Service Payment Receive</h3>
         <nav aria-label="breadcrumb" style="padding-right: 5px">
             <ol class="breadcrumb">
-
-                <li class="breadcrumb-item active"><a wire:navigate href="{{ route('receive-payment') }}" style="color: #3C50E0">Receive Payments</a></li>
+                <li class="breadcrumb-item"><a href="#">Payment Receive</a></li>
+                <li class="breadcrumb-item active"><a wire:navigate href="{{ route('apartment-info') }}" style="color: #3C50E0">payment receive</a></li>
             </ol>
         </nav>
     </div>
@@ -26,71 +25,50 @@
                     <option value="100">100</option>
                 </select>
             </div>
-
-            <div class="col-auto">
-                <a wire:navigate href='{{ route('add-receive-payment') }}' class="btn btn-primary">
-                    Add New Receive Payment
-                </a>
-            </div>
         </div>
         <div class="responsive-table">
             <table class="table table-bordered table-hover">
                 <thead>
                     <tr class="bg-sidebar">
-                        <td  style="width: 5%">#</td>
-                        {{-- <td  style="">ID</td> --}}
-                        <td  style="">Name</td>
-                        <td  style="">Phone</td>
-                        <td  style="">Email</td>
-                        <td  style="">Booking ID</td>
-                        <td  style="">Product</td>
-                        <td  style="">Handover</td>
-                        <td class="text-center" style="">Action</td>
+                        <td  style="">#</td>
+                        <td  style="">Bill No</td>
+                        <td  style="">Apartment ID</td>
+                        <td  style="">Month</td>
+                        <td  style="">Bill Amt</td>
+                        <td  style="">Paid Amt</td>
+                        <td  style="">Status</td>
                     </tr>
                 </thead>
-                {{-- <tbody>
-                    @if (count($this->resultCustomer) > 0)
-                    @foreach ($this->resultCustomer as $key => $customer)
+                <tbody>
+                    @if (count($this->resultPayments) > 0)
+                    @foreach ($this->resultPayments as $key => $data)
                     <tr wire:key='{{ $key }}'>
-                        <td>{{ $this->resultCustomer->firstItem() + $key }}</td>
+                        <td>{{ $this->resultPayments->firstItem() + $key }}</td>
+                        <td>{{ $data->auto_bill_no }}</td>
+                        <td>{{ $data->apartment_id }}</td>
+                        <td>{{ Carbon\Carbon::parse($data->bill_month)->format('M, Y') }}</td>
+                        <td>{{ $data->tot_bill_amt }}</td>
+                        <td>{{ $data->paid_amount }}</td>
                         <td>
-                            {{ $customer->customer_name }}
-                            <span class="text-muted">({{ $customer->customer_id }})</span>
-                        </td>
-                        <td>{{ $customer->cell_no }}</td>
-                        <td>{{ $customer->email_id }}</td>
-                        <td>{{ $customer->booking_id }}</td>
-                        <td>
-                            {{ $customer->product_id }}
-                            <span class="text-muted">({{ $customer->product_type }})</span>
-                        </td>
-                        <td>{{ Carbon\Carbon::parse($customer->handover_date)->format('d-M-Y') }}</td>
-
-                        <td style="display: flex; justify-content:center">
-                            <div class="">
-                                <a wire:navigate href='{{ route('customer-edit', $customer->customer_id) }}'
-
-                                    class="btn btn-sm btn-success">
-                                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 50 50">
-                                        <path fill="white" d="M 43.050781 1.9746094 C 41.800781 1.9746094 40.549609 2.4503906 39.599609 3.4003906 L 38.800781 4.1992188 L 45.699219 11.099609 L 46.5 10.300781 C 48.4 8.4007812 48.4 5.3003906 46.5 3.4003906 C 45.55 2.4503906 44.300781 1.9746094 43.050781 1.9746094 z M 37.482422 6.0898438 A 1.0001 1.0001 0 0 0 36.794922 6.3925781 L 4.2949219 38.791016 A 1.0001 1.0001 0 0 0 4.0332031 39.242188 L 2.0332031 46.742188 A 1.0001 1.0001 0 0 0 3.2578125 47.966797 L 10.757812 45.966797 A 1.0001 1.0001 0 0 0 11.208984 45.705078 L 43.607422 13.205078 A 1.0001 1.0001 0 1 0 42.191406 11.794922 L 9.9921875 44.09375 L 5.90625 40.007812 L 38.205078 7.8085938 A 1.0001 1.0001 0 0 0 37.482422 6.0898438 z"></path>
-                                        </svg>
-                                </a>
-                            </div>
+                            @if ($data->status == 'PAID')
+                            <span class="badge bg-success">PAID</span>
+                            @else
+                            <span class="badge bg-danger">UNPAID</span>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
                     @endif
-                </tbody> --}}
+                </tbody>
             </table>
         </div>
-        {{-- <span>{{ $this->resultCustomer->links() }}</span> --}}
+        <span>{{ $this->resultPayments->links() }}</span>
     </div>
 </div>
 
 <script>
 
 </script>
-
 
 
 

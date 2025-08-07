@@ -25,7 +25,7 @@
             justify-content: center;
             min-height: 100vh;
             color: #333;
-            background: #00000075
+            background: #00000012
         }
 
         .container {
@@ -34,7 +34,7 @@
         }
 
         .card {
-            background: #0000004f;
+            background: #00000014;
             color: white
         }
 
@@ -48,6 +48,7 @@
 
         .btn-primary {
             box-shadow: none !important;
+            background: #3EA742 !important
         }
     </style>
 </head>

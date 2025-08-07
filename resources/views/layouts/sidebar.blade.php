@@ -105,8 +105,27 @@
             </ul>
         </li>
 
-        <li class="{{ request()->routeIs('receive-payment') ? 'active' : ' ' }}">
-            <a wire:navigate href="{{ route('receive-payment') }}"><i class="fas fa-dollar-sign"></i></i> Receive Payemnts</a>
+        <li>
+            <a href="#RPSubmenu" data-toggle="collapse" aria-expanded="true"
+                class="dropdown-toggle dropdown-custom-toggle main-list">
+                <i class="fa-solid fa-user-gear"></i> Receive Payments
+            </a>
+            <ul class="collapse list-unstyled
+        {{ request()->routeIs('add-service-payment') ? 'show' : ' ' }}
+        {{ request()->routeIs('add-receive-payment') ? 'show' : ' ' }}
+
+        " id="RPSubmenu">
+                <li class="{{ request()->routeIs('add-service-payment') ? 'active' : ' ' }}">
+                    <a class="list" wire:navigate href="{{ route('add-service-payment') }}"> - Service Payment</a>
+                </li>
+                <li class="{{ request()->routeIs('add-receive-payment') ? 'active' : ' ' }}">
+                    <a class="list" wire:navigate href="{{ route('add-receive-payment') }}"> - Other Payment</a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="{{ request()->routeIs('service-bill-info') ? 'active' : ' ' }}">
+            <a wire:navigate href="{{ route('service-bill-info') }}"><i class="fas fa-dollar-sign"></i></i> Service Bill Info</a>
         </li>
         <li class="">
             <a wire:navigate href=""><i class="fa fa-question-circle" aria-hidden="true"></i></i> Help</a>

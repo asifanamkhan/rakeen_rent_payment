@@ -13,29 +13,33 @@ class ReceivePayment extends Component
     protected $paginationTheme = 'bootstrap';
 
 
-    public $search;
+    public $search, $status;
     public $pagination = 10;
 
 
     #[Computed]
     public function resultPayments()
     {
-        $apartments = DB::table('SRV_APARTMENT_BILL');
+        $apartments = DB::table('VW_SRV_APARTMENT_BILL_INFO');
 
 
         if ($this->search) {
             $apartments
                 ->orwhere(DB::raw('lower(BILL_ID)'), 'like', '%' . strtolower($this->search) . '%')
-                ->orwhere(DB::raw('lower(APARTMENT_ID)'), 'like', '%' . strtolower($this->search) . '%')
+                ->orwhere(DB::raw('lower(product_id)'), 'like', '%' . strtolower($this->search) . '%')
                 ->orwhere(DB::raw('lower(BILL_MONTH)'), 'like', '%' . strtolower($this->search) . '%')
-                ->orwhere(DB::raw('lower(AUTO_BILL_NO)'), 'like', '%' . strtolower($this->search) . '%')
-                ->orwhere(DB::raw('lower(STATUS)'), 'like', '%' . strtolower($this->search) . '%');
+                ->orwhere(DB::raw('lower(CUSTOMER_NAME)'), 'like', '%' . strtolower($this->search) . '%')
+                ->orwhere(DB::raw('lower(AUTO_BILL_NO)'), 'like', '%' . strtolower($this->search) . '%');
 
+        }
+
+        if($this->status){
+            $apartments->where('status', $this->status);
         }
 
         return $apartments
             ->orderBy('BILL_MONTH', 'ASC')
-            ->orderBy('APARTMENT_ID', 'ASC')
+            ->orderBy('PRODUCT_ID', 'ASC')
             ->paginate($this->pagination);
     }
 

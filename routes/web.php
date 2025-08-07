@@ -2,8 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CustomerController;
-
-
+use App\Http\Controllers\InvoiceController;
 use App\Livewire\Dashboard\Admin\Apartment\ApartmentInfo;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
@@ -12,6 +11,8 @@ use App\Livewire\Dashboard\Admin\Company\CompanyInfo;
 use App\Livewire\Dashboard\Admin\Module\Module;
 use App\Livewire\Dashboard\Admin\ReceivePayment\AddReceivePayment;
 use App\Livewire\Dashboard\Admin\ReceivePayment\ReceivePayment;
+use App\Livewire\Dashboard\Admin\ReceivePayment\Service\AddServicePayment;
+use App\Livewire\Dashboard\Admin\ReceivePayment\Service\ServicePayment;
 use App\Livewire\Dashboard\Admin\Role\{Role, RoleCreate, RoleDetails};
 use App\Livewire\Dashboard\Admin\Service\ServiceType;
 use App\Livewire\Dashboard\Admin\User\{User, UserCreate};
@@ -76,10 +77,16 @@ Route::middleware(['auth', 'verified', 'throttle:60,1'])->group(function () {
 
     // ------------- receive-payment start ----------------
 
-    Route::get('receive-payment', ReceivePayment::class)->name('receive-payment');
+    Route::get('service-bill-info', ReceivePayment::class)->name('service-bill-info');
     Route::get('add-receive-payment', AddReceivePayment::class)->name('add-receive-payment');
 
+    Route::get('service-payment', ServicePayment::class)->name('service-payment');
+    Route::get('add-service-payment', AddServicePayment::class)->name('add-service-payment');
+
     // ------------- receive-payment end ----------------
+
+    //--------------- Report -----------------------------
+    Route::get('service-bill-invoice/{bill_id}', [InvoiceController::class, 'service_bill_invoice'])->name('service-bill-invoice');
 
 
 });

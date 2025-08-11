@@ -39,7 +39,7 @@
     <table cellspacing="0" cellpadding="2.5" style="">
         <thead>
             <tr style="">
-                <td style="width: 18%;border-bottom: 1px solid #000;font-size: 11px; text-align:left;"><b>To be paid By:</b></td>
+                <td style="width: 11%;border-bottom: 1px solid #000;font-size: 11px; text-align:left;"><b>Paid By:</b></td>
                 <td></td>
             </tr>
             <tr>
@@ -48,16 +48,16 @@
             <tr>
                 <td style="width: 17%"><b>Apartment ID </b> </td>
                 <td style="width: 54%">: {{ $bill->product_id }} ({{ $bill->product_type }})</td>
-                <td style="width:13%"><b>Bill no</b></td>
+                <td style="width:13%"><b>Invoice no</b></td>
                 <td style="width: 2%">:</td>
-                <td style="width:16%; text-align: right"> {{ $bill->auto_bill_no }}</td>
+                <td style="width:16%; text-align: right"> {{ $bill->auto_receipt_no }}</td>
             </tr>
             <tr>
                 <td style="width: 17%"><b>Customer Name </b> </td>
                 <td style="width: 54%">: {{ $bill->customer_name }} ({{ $bill->customer_id }})</td>
-                <td style="width:13%"><b>Bill month</b></td>
+                <td style="width: 13%;"><b>Invoice date</b></td>
                 <td style="width: 2%">:</td>
-                <td style="width:16%; text-align: right"> {{ \Carbon\Carbon::parse($bill->bill_month)->format('F-Y') }}</td>
+                <td style="width:16%; text-align: right"> {{ date('d-M-y', strtotime($bill->payment_date)) }}</td>
 
             </tr>
             <tr>
@@ -79,67 +79,59 @@
         <thead>
             <tr>
                 <th class="invoice-items-head" style="width: 60%; text-align: center">
-                    Particulars
+                    Bill Month
                 </th>
                 <th class="invoice-items-head" style="width: 40%; text-align: center">
-                    Amount
+                    Paid Amount
                 </th>
             </tr>
         </thead>
-
+        @if ($bill->service_name == 'SERVICE')
         <tbody>
                 @php
                     $total = 0;
-                    $product_id = DB::table('VW_SRV_APARTMENT_BILL_INFO')
-                        ->where('bill_id', $bill->bill_id)
-                        ->first()
-                        ->product_id;
-
-                    $unpaid_bill_month = DB::table('SRV_APARTMENT_BILL')
-                        ->where('apartment_id', $product_id)
-                        ->where('status', 'UNPAID')
-                        ->where('bill_month','<=', $bill->bill_month)
+                    $paid_bill_month = DB::table('SRV_APARTMENT_BILL')
+                        ->where('auto_receipt_no', $bill->receipt_id)
                         ->get();
 
-                    $opening = DB::table('SRV_PAYMENT_RECEIPT')
-                            ->where('apartment_id', $product_id)
-                            ->where('status', 'OP')
-                            ->sum('paid_amount');
-
                 @endphp
-                <tr>
-                    <td style="width: 60%; text-align: center">
-                        Previous
-                        @if ($opening <= 0)
-                            (Dues):
-
-                        @else
-                            (Advance) :
-                        @endif
-                    </td>
-                    <td style="width: 40%;text-align: right">
-                        {{ number_format(abs($opening), 2) }}
-                    </td>
-                </tr>
-                @if (count($unpaid_bill_month) > 0)
-                @foreach ($unpaid_bill_month as $key => $data)
+                @if (count($paid_bill_month) > 0)
+                @foreach ($paid_bill_month as $key => $data)
                     @php
-                        $total += (float)$data->tot_bill_amt;
+                        $total += (float)$data->paid_amount;
                     @endphp
                     <tr>
                         <td style="width: 60%; text-align: center"> {{ \Carbon\Carbon::parse($data->bill_month)->format('F-Y') }}</td>
-                        <td style="width: 40%; text-align: right">{{ number_format($data->tot_bill_amt, 2) }}</td>
+                        <td style="width: 40%; text-align: right">{{ number_format($data->paid_amount, 2) }}</td>
                     </tr>
                 @endforeach
                 @endif
-
+                @if ($bill->paid_amount > $total)
+                @php
+                    $rest = (float)$bill->paid_amount - $total;
+                @endphp
+                    <tr>
+                        <td style="text-align: center">From Opening</td>
+                        <td style="text-align: right">{{ number_format($rest, 2) }}</td>
+                    </tr>
+                @endif
             </tbody>
             <tfoot>
                 <tr>
-                    <th style="text-align: center"><b>In amount to be Paid</b></th>
-                    <th style="text-align: right"><b>{{ number_format(abs($opening - $total), 2) }}</b></th>
+                    <th style="text-align: center"><b>Total</b></th>
+                    <th style="text-align: right"><b>{{ number_format($bill->paid_amount, 2) }}</b></th>
                 </tr>
             </tfoot>
+        @else
+        <tbody>
+            <tr>
+                <td style="width: 60%; text-align: center">
+                  {{ $bill->service_name }} Bill of  {{ \Carbon\Carbon::parse($bill->bill_month)->format('F-Y') }}
+                </td>
+                <td style="width: 40%; text-align: right"><b>{{ number_format($bill->paid_amount, 2) }}</b></td>
+            </tr>
+        </tbody>
+        @endif
     </table>
 </body>
 

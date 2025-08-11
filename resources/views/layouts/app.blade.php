@@ -108,7 +108,7 @@
                     </button>
 
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                       
+
                         <ul class="nav navbar-nav ml-auto">
                             <li class="nav-item d-flex align-items-center justify-content-center">
                                 <select onchange="redirectToRoute(this)" name="" id="" class="form-select">
@@ -119,7 +119,7 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link " href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">
-                                    <img src="https://via.placeholder.com/40" class="rounded-circle profile-img"
+                                    <img src="https://avatar.iran.liara.run/public/11" class="rounded-circle profile-img"
                                         alt="Profile Photo"> <!-- Replace with your logo URL -->
                                 </a>
                                 <div class="dropdown-menu drop-nav-menu" aria-labelledby="navbarDropdown">

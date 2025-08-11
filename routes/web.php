@@ -81,14 +81,16 @@ Route::middleware(['auth', 'verified', 'throttle:60,1'])->group(function () {
     Route::get('add-receive-payment', AddReceivePayment::class)->name('add-receive-payment');
 
     Route::get('service-payment', ServicePayment::class)->name('service-payment');
-    Route::get('add-service-payment', AddServicePayment::class)->name('add-service-payment');
+    Route::get('add-service-payment/{product_id}', AddServicePayment::class)->name('add-service-payment');
+
+    Route::get('money-receipt-print', \App\Livewire\Dashboard\Admin\ReceivePayment\MoneyReceiptPrint::class)->name('money-receipt-print');
+    Route::get('service-bill-invoice-print', \App\Livewire\Dashboard\Admin\ReceivePayment\ServiceBillInvoicePrint::class)->name('service-bill-invoice-print');
 
     // ------------- receive-payment end ----------------
 
     //--------------- Report -----------------------------
     Route::get('service-bill-invoice/{bill_id}', [InvoiceController::class, 'service_bill_invoice'])->name('service-bill-invoice');
-
-
+    Route::get('money-receipt-print-pdf/{receipt_id}/{type}', [InvoiceController::class, 'money_receipt_print'])->name('money-receipt-print-pdf');
 });
 
 

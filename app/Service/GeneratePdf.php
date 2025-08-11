@@ -7,9 +7,10 @@ use App\Service\CustomTcPDFHF;
 
 class GeneratePdf
 {
-    public static function generate($data){
+    public static function generate($data, $headerTitle = null)
+    {
 
-        $pdf = new CustomTcPDFHF();
+        $pdf = new CustomTcPDFHF($headerTitle);
         // $pdf = new CustomTcPDFHF('L', 'pt', ['format' => 'A4']);
 
         // Set document information

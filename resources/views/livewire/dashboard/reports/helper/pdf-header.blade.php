@@ -26,23 +26,22 @@
         }
 
         .company-name {
-            font-size: 22px;
+            font-size: 20px;
             text-align: right;
             font-weight: bold
         }
 
         .pdf-title {
-            font-size: 22px;
+            font-size: 16px;
             text-align: right;
             font-weight: bold;
-            color: #4CAF50
+            color: #4CAF50;
         }
-
     </style>
 </head>
 
 <body>
-    <table cellpadding="3">
+    <table cellpadding="2">
         <tr>
             <td rowspan="5" style="width: 30%">
                 <img class="logo" src="{{ $logo }}" alt="">
@@ -56,24 +55,19 @@
         </tr>
         <tr>
             <td class="company-details" >
-                <div style="padding: 10px;">{{ $company->comp_add }}</div>
+                <div >{{ $company->comp_add }}</div>
             </td>
         </tr>
         <tr>
             <td  style="text-align: right">
-                <b>Contact:</b> {{ $company->comp_email }} | {{ $company->comp_phone }}
+                <b>Contact:</b> {{ $company->comp_email }} | {{ $company->comp_phone }} | {{ $company->comp_web }}
             </td>
         </tr>
-        <tr>
+        <tr cellpadding="">
             <td class="pdf-title">
                 {{ $headerTitle }}
             </td>
         </tr>
-        <tr>
-            <td>Printing date: {{ date('d-M-Y', strtotime($date)) }}</td>
-            <td style="text-align: right; font-style:italic">Reporting currency: Taka</td>
-        </tr>
-
     </table>
 </body>
 

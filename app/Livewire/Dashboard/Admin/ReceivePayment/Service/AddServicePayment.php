@@ -14,14 +14,21 @@ class AddServicePayment extends Component
     public $products;
     public $payment_details = [];
 
-    public function mount()
+    public function mount($product_id = null)
     {
         $this->productsAll();
         $this->state['payment_date'] = date('Y-m-d');
         $this->state['bill_month'] = date('Y-m');
         $this->state['total_bill'] = 0;
+        $this->state['money_receipt'] = '';
         $this->state['service_payment_amount'] = '';
         $this->state['due'] = 0;
+        $this->state['product_id'] = $product_id;
+        if($this->state['product_id'] != 'new'){
+            $this->search_payment();
+        }
+
+
     }
 
     public function productsAll()
@@ -84,10 +91,22 @@ class AddServicePayment extends Component
     #[On('save_form')]
     public function save()
     {
-        if(!$this->state['service_payment_amount'] || $this->state['service_payment_amount'] == 0) {
+
+        if (!$this->state['service_payment_amount'] || $this->state['service_payment_amount'] == 0) {
             session()->flash('warning', 'Please enter service payment amount.');
             return false;
         }
+
+        $auto_id = DB::table('SRV_PAYMENT_RECEIPT')->insertGetId([
+            'apartment_id' => $this->state['product_id'],
+            'bill_month' => date('Y-m-01'),
+            'payment_date' => $this->state['payment_date'],
+            'paid_amount' => $this->state['service_payment_amount'],
+            'paid_by' => Auth::user()->name,
+            'service_type' => 1,
+            'money_receipt_no' => $this->state['money_receipt'],
+            'status' => 1,
+        ], 'receipt_id');
 
         $opening = $this->payment_details['opening'];
         $rest_amount = $this->state['service_payment_amount'];
@@ -99,16 +118,16 @@ class AddServicePayment extends Component
                         ->update([
                             'paid_amount' => $monthly->tot_bill_amt,
                             'status' => 'PAID',
-                            'payment_date' => $this->state['payment_date']
+                            'payment_date' => $this->state['payment_date'],
+                            'auto_receipt_no' => $auto_id
                         ]);
                     $rest_amount -= $monthly->tot_bill_amt;
-                    if($rest_amount <= 0)   break;
+                    if ($rest_amount <= 0) break;
                 }
             }
         }
 
         $opening = $this->payment_details['opening'] + $rest_amount;
-
         DB::table('SRV_PAYMENT_RECEIPT')
             ->where('apartment_id', $this->state['product_id'])
             ->where('service_type', 1)
@@ -117,18 +136,10 @@ class AddServicePayment extends Component
                 'paid_amount' => $opening,
             ]);
 
-        DB::table('SRV_PAYMENT_RECEIPT')->insert([
-            'apartment_id' => $this->state['product_id'],
-            'bill_month' => date('Y-m-01'),
-            'payment_date' => $this->state['payment_date'],
-            'paid_amount' => $this->state['service_payment_amount'],
-            'paid_by' => Auth::user()->name,
-            'service_type' => 1
-        ]);
-
         session()->flash('status', 'Payment Success');
-        return $this->redirect(route('add-service-payment'), navigate: true);
+        return $this->redirect(route('add-service-payment','new'), navigate: true);
     }
+
     public function render()
     {
         return view('livewire.dashboard.admin.receive-payment.service.add-service-payment');

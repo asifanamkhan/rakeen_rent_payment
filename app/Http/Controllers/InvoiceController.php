@@ -14,26 +14,54 @@ class InvoiceController extends Controller
     {
         $bill = DB::table('VW_SRV_APARTMENT_BILL_INFO as b')
             ->where('bill_id', $bill_id)
-            ->leftJoin('SALES_CUSTOMER_INFO as c', function ($join) {
-                $join->on('b.cus_id', '=', 'c.cus_id');
-            })
             ->first([
                 'b.*',
-                'c.email_id',
-                'c.cell_no',
-                'c.add_present',
             ]);
         $data = [
             'bill' => $bill
         ];
-        // dd($bill);
+
         $html = view()->make('livewire.dashboard.reports.invoice.service-bill-invoice', $data)->render();
         $pdf_data = [
             'html' => $html,
-            'filename' => 'customer-info.pdf',
+            'filename' => 'service-bill-invoice.pdf',
         ];
-        GeneratePdf::generate($pdf_data);
 
+        GeneratePdf::generate($pdf_data, 'SERVICE BILL INVOICE');
     }
 
+    public function money_receipt_print($receipt_id, $type)
+    {
+
+        $payment = DB::table('VW_SRV_PAYMENT_INFO as p')
+            ->where('receipt_id', $receipt_id)
+            ->first([
+                'p.*',
+            ]);
+
+        if (!$payment) {
+            abort(404, 'Payment receipt not found');
+        }
+
+        $data = [
+            'bill' => $payment,
+            'report_name' => 'MONEY RECEIPT',
+        ];
+        $report_name = 'MONEY RECEIPT';
+        // if($type == 'SERVICE'){
+        //     $report_name = 'SERVICE BILL INVOICE';
+        // }else if($type == 'ELECTRICITY'){
+        //     $report_name = 'ELECTRICITY BILL INVOICE';
+        // }else if($type == 'WATER'){
+        //     $report_name = 'WATER BILL INVOICE';
+        // }
+
+        $html = view()->make('livewire.dashboard.reports.invoice.money-receipt', $data)->render();
+        $pdf_data = [
+            'html' => $html,
+            'filename' => 'money-receipt-' . $receipt_id . '.pdf',
+        ];
+
+        GeneratePdf::generate($pdf_data, $report_name);
+    }
 }

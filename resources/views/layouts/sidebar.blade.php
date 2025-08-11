@@ -104,11 +104,15 @@
 
             </ul>
         </li>
-
+        <li class="{{ request()->routeIs('service-bill-info') ? 'active' : ' ' }}">
+            <a wire:navigate href="{{ route('service-bill-info') }}"><i class="fas fa-dollar-sign"></i></i> Service Bill
+                Info</a>
+        </li>
         <li>
             <a href="#RPSubmenu" data-toggle="collapse" aria-expanded="true"
                 class="dropdown-toggle dropdown-custom-toggle main-list">
-                <i class="fa-solid fa-user-gear"></i> Receive Payments
+                <i class="fa-solid fa-file-invoice" role="img" aria-label="Invoice"></i>
+                Receive Payments
             </a>
             <ul class="collapse list-unstyled
         {{ request()->routeIs('add-service-payment') ? 'show' : ' ' }}
@@ -116,17 +120,24 @@
 
         " id="RPSubmenu">
                 <li class="{{ request()->routeIs('add-service-payment') ? 'active' : ' ' }}">
-                    <a class="list" wire:navigate href="{{ route('add-service-payment') }}"> - Service Payment</a>
+                    <a class="list" wire:navigate href="{{ route('add-service-payment','new') }}"> - Service Payment</a>
                 </li>
                 <li class="{{ request()->routeIs('add-receive-payment') ? 'active' : ' ' }}">
                     <a class="list" wire:navigate href="{{ route('add-receive-payment') }}"> - Other Payment</a>
                 </li>
+
             </ul>
         </li>
-
-        <li class="{{ request()->routeIs('service-bill-info') ? 'active' : ' ' }}">
-            <a wire:navigate href="{{ route('service-bill-info') }}"><i class="fas fa-dollar-sign"></i></i> Service Bill Info</a>
+        <li class="{{ request()->routeIs('service-bill-invoice-print') ? 'active' : ' ' }}">
+            <a wire:navigate href="{{ route('service-bill-invoice-print') }}"><i class="fas fa-print"
+                    aria-hidden="true"></i></i>Service Bill Invoice Print</a>
         </li>
+
+        <li class="{{ request()->routeIs('money-receipt-print') ? 'active' : ' ' }}">
+            <a wire:navigate href="{{route('money-receipt-print') }}"><i class="fas fa-print"
+                    aria-hidden="true"></i></i> Money Receipt Print</a>
+        </li>
+
         <li class="">
             <a wire:navigate href=""><i class="fa fa-question-circle" aria-hidden="true"></i></i> Help</a>
         </li>

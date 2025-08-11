@@ -36,29 +36,29 @@
             <table class="table table-bordered table-hover">
                 <thead>
                     <tr class="bg-sidebar">
-                        <td  style="width:5%">#</td>
+                        <td  style="width:5%">SL#</td>
                         <td  style="width:12%">Bill No</td>
                         <td  style="width:10%">Apartment ID</td>
-                        <td  style="width:25%">Customer</td>
+                        <td  style="width:30%">Customer</td>
                         <td  style="width:10%">Bill Month</td>
-                        <td  style="width:8%">Bill Amt</td>
-                        <td  style="width:8%">Paid Amt</td>
+                        <td  style="width:9%">Bill Amt</td>
+                        <td  style="width:9%">Paid Amt</td>
                         <td  style="width:7%">Status</td>
-                        <td  style="width:15%">Action</td>
+                        <td  style="width:8%">Action</td>
                     </tr>
                 </thead>
                 <tbody>
                     @if (count($this->resultPayments) > 0)
                     @foreach ($this->resultPayments as $key => $data)
                     <tr wire:key='{{ $key }}'>
-                        <td>{{ $this->resultPayments->firstItem() + $key }}</td>
-                        <td>{{ $data->auto_bill_no }}</td>
-                        <td>{{ $data->product_id }}</td>
+                        <td style="text-align: center" >{{ $this->resultPayments->firstItem() + $key }}</td>
+                        <td style="text-align: center" >{{ $data->auto_bill_no }}</td>
+                        <td style="text-align: center" >{{ $data->product_id }}</td>
                         <td>
                             {{ $data->customer_name }}
                             <span class="text-muted">({{ $data->customer_id }})</span>
                         </td>
-                        <td>{{ Carbon\Carbon::parse($data->bill_month)->format('M, Y') }}</td>
+                        <td style="text-align: center">{{ Carbon\Carbon::parse($data->bill_month)->format('M, Y') }}</td>
                         <td style="text-align: center">{{ number_format($data->tot_bill_amt, 2) }}</td>
                         <td style="text-align: center">{{ number_format($data->paid_amount, 2) }}</td>
                         <td>
@@ -70,13 +70,13 @@
                         </td>
                         <td>
                             @if ($data->status != 'PAID')
-                            <a class="btn btn-sm btn-primary" wire:navigate href="">
+                            <a class="btn btn-sm btn-success" wire:navigate href="{{ route('add-service-payment', $data->product_id) }}">
                                 Payment
                             </a>
                             @endif
-                            <a target="_blank" class="btn btn-sm btn-success" href="{{ route('service-bill-invoice', $data->bill_id) }}">
+                            {{-- <a target="_blank" class="btn btn-sm btn-success" href="{{ route('service-bill-invoice', $data->bill_id) }}">
                                 Invoice
-                            </a>
+                            </a> --}}
                         </td>
                     </tr>
                     @endforeach

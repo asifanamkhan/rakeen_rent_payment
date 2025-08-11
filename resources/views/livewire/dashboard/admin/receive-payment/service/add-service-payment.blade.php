@@ -58,6 +58,10 @@
                         <small class="form-text text-danger">{{ $message }}</small>
                         @enderror
                     </div>
+                    <div class="form-group mt-3">
+                        <x-input required_mark='' wire:model='state.money_receipt' name="money_receipt" type='number'
+                            label='Money Receipt' />
+                    </div>
                     <div class="mt-4 text-center">
                         <a style="background-color: #39A33C !important" wire:click='search_payment' class="btn btn-primary">
                             <i class="fas fa-search"></i> SEARCH

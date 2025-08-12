@@ -41,16 +41,14 @@ class ServicePaymentReport extends Component
         }
 
         if ($this->from_month) {
-            $start = date('Y-m-01', strtotime($this->from_month . '-01'));
-            $query->where('p.bill_month', '>=', $start);
+            $query->where('p.payment_date', '>=', $this->from_month);
         }
 
         if ($this->to_month) {
-            $end = date('Y-m-t', strtotime($this->to_month . '-01'));
-            $query->where('p.bill_month', '<=', $end);
+            $query->where('p.payment_date', '<=', $this->to_month);
         }
 
-        return $query->orderBy('p.bill_month', 'DESC')
+        return $query->orderBy('p.payment_date', 'DESC')
             ->orderBy('p.product_id', 'ASC')
             ->paginate($this->pagination);
     }

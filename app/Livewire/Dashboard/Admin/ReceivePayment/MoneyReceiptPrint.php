@@ -14,13 +14,14 @@ class MoneyReceiptPrint extends Component
 
     public $search = '';
     public $product_id = '';
-    public $bill_month = '';
+    public $from_month = '';
+    public $to_month = '';
     public $payment_type = '';
     public $pagination = 10;
 
     public function mount()
     {
-        $this->bill_month = '';
+
     }
 
     #[Computed]
@@ -33,8 +34,12 @@ class MoneyReceiptPrint extends Component
             $bills->where('product_id', $this->product_id);
         }
 
-        if ($this->bill_month) {
-            $bills->where('bill_month', 'like', $this->bill_month . '%');
+        if ($this->from_month) {
+            $bills->where('payment_date', '>=', $this->from_month);
+        }
+
+        if ($this->to_month) {
+            $bills->where('payment_date', '<=', $this->to_month);
         }
 
         if ($this->payment_type) {
@@ -54,13 +59,14 @@ class MoneyReceiptPrint extends Component
                     ->paginate($this->pagination);
     }
 
-    public function search_payment(){
+    public function search_report()
+    {
         $this->resetPage();
     }
 
     public function resetFilters()
     {
-        $this->reset(['product_id', 'bill_month', 'payment_type']);
+        $this->reset(['product_id', 'from_month', 'to_month', 'payment_type']);
         $this->resetPage();
     }
 

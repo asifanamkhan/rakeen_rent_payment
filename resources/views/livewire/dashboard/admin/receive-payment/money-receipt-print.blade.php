@@ -14,54 +14,58 @@
 
     <div class="card p-4">
         <!-- Search Filters -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="form-group" wire:ignore>
-                    <label for="">Select Apartment<span style="color: red"> * </span></label>
-                    <select name="product_id" class="form-select select2" id='product_id'>
-                        <option value="">Select </option>
-                        @forelse ($products as $product)
-                        <option value="{{ $product->product_id }}">
-                            {{ $product->product_id }}
-                            ({{ $product->product_type }})
-                            => {{ $product->customer_id }}
-                        </option>
-                        @empty
-                        <option value=""></option>
-                        @endforelse
-                    </select>
+        <form wire:submit="search_report">
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="form-group" wire:ignore>
+                        <label for="">Select Apartment<span style="color: red"> * </span></label>
+                        <select name="product_id" class="form-select select2" id='product_id'>
+                            <option value="">Select </option>
+                            @forelse ($products as $product)
+                            <option value="{{ $product->product_id }}">
+                                {{ $product->product_id }}
+                                ({{ $product->product_type }})
+                                => {{ $product->customer_id }}
+                            </option>
+                            @empty
+                            <option value=""></option>
+                            @endforelse
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <x-input required_mark='' wire:model='from_month' name='from_month' type='date'
+                        label='From Date' />
+                </div>
+
+                <div class="col-md-3">
+                    <x-input required_mark='' wire:model='to_month' name='to_month' type='date' label='To Date' />
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="payment_type">Payment Type</label>
+                        <select wire:model='payment_type' class="form-select">
+                            <option value="">All Types</option>
+                            @foreach($paymentTypes as $type)
+                            <option value="{{ $type['name'] }}">{{ $type['name'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: center; gap:10px">
+                    <div class=" ">
+                        <button class="btn btn-primary">Search</button>
+                    </div>
+                    <div class=" ">
+                        <button type="button" wire:click="resetFilters" class="btn btn-secondary">Reset</button>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="bill_month">Bill Month</label>
-                    <input type="month" wire:model='bill_month' class="form-control">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="payment_type">Payment Type</label>
-                    <select wire:model='payment_type' class="form-select">
-                        <option value="">All Types</option>
-                        @foreach($paymentTypes as $type)
-                        <option value="{{ $type['name'] }}">{{ $type['name'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <button style="margin-top: 20px" class="btn btn-primary" id='search' wire:click='search_payment'>
-                    <i class="fas fa-search"></i> Search
-                </button>
-            </div>
-        </div>
+        </form>
 
         <!-- Filter Actions -->
         <div class="row mb-3">
             <div class="col-12">
-                <button wire:click="resetFilters" class="btn btn-primary btn-sm">
-                    <i class="fas fa-refresh"></i> Reset Filters
-                </button>
                 <div class="float-end">
                     <select class="form-select form-select-sm d-inline-block w-auto" wire:model.live='pagination'>
                         <option value="10">10</option>
@@ -102,8 +106,8 @@
                             @endif
                         </td>
                         <td style="text-align: center">
-                            @if(isset($data->bill_month))
-                            {{ \Carbon\Carbon::parse($data->bill_month)->format('M, Y') }}
+                            @if(isset($data->payment_date))
+                            {{ \Carbon\Carbon::parse($data->payment_date)->format('d-M-Y') }}
                             @else
                             N/A
                             @endif

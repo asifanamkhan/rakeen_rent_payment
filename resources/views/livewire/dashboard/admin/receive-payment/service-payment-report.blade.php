@@ -37,12 +37,12 @@
                 </div>
 
                 <div class="col-md-3">
-                    <x-input required_mark='' wire:model='from_month' name='from_month' type='month'
-                        label='From month' />
+                    <x-input required_mark='' wire:model='from_month' name='from_month' type='date'
+                        label='From Date' />
                 </div>
 
                 <div class="col-md-3">
-                    <x-input required_mark='' wire:model='to_month' name='to_month' type='month' label='To month' />
+                    <x-input required_mark='' wire:model='to_month' name='to_month' type='date' label='To Date' />
                 </div>
 
                 <div class="col-md-3">

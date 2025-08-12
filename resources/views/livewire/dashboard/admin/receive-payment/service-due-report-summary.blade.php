@@ -54,14 +54,14 @@
         @if (count($this->dues) > 0)
         <div>
             <div style="display: flex; justify-content: space-between" class="p-2">
-                <div style="float: left">
+                {{-- <div style="float: left">
                     <select class="form-select form-select-sm d-inline-block w-auto" wire:model.live='pagination'>
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                         <option value="100">100</option>
                     </select>
-                </div>
+                </div> --}}
                 <div style="float: right">
                     <form target="_blank" action="{{ route('service-due-report-summary-pdf') }}" method="post">
                         @csrf
@@ -74,7 +74,7 @@
                     </form>
                 </div>
             </div>
-            <div class="responsive-table" style="font-size: 0.9em !important;">
+            <div class="responsive-table" style="font-size: 0.9em !important; max-height: 500px; overflow-y: scroll">
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr class="bg-sidebar">

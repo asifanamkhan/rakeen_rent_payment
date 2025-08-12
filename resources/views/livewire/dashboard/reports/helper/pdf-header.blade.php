@@ -16,7 +16,7 @@
         }
 
         .logo {
-            width: 90px;
+            width: 100px;
             height: auto
         }
 
@@ -26,7 +26,7 @@
         }
 
         .company-name {
-            font-size: 20px;
+            font-size: 18px;
             text-align: right;
             font-weight: bold
         }
@@ -41,29 +41,29 @@
 </head>
 
 <body>
-    <table cellpadding="2">
+    <table cellpadding="2.5">
         <tr>
-            <td rowspan="5" style="width: 30%">
+            <td rowspan="5" style="width: 20%">
                 <img class="logo" src="{{ $logo }}" alt="">
             </td>
             <td></td>
         </tr>
         <tr>
-            <td  style="text-align: right;width: 70%">
+            <td  style="text-align: right; width: 80%">
                 <span class="company-name">{{ $company->comp_name }}</span>
             </td>
         </tr>
         <tr>
-            <td class="company-details" >
+            <td style="text-align: right;width: 80%"  >
                 <div >{{ $company->comp_add }}</div>
             </td>
         </tr>
         <tr>
-            <td  style="text-align: right">
+            <td style="text-align: right;width: 80%" >
                 <b>Contact:</b> {{ $company->comp_email }} | {{ $company->comp_phone }} | {{ $company->comp_web }}
             </td>
         </tr>
-        <tr cellpadding="">
+        <tr colspan="2">
             <td class="pdf-title">
                 {{ $headerTitle }}
             </td>

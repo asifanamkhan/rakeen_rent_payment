@@ -31,16 +31,13 @@
         {{ request()->routeIs('company-info') ? 'show' : ' ' }}
         {{ request()->routeIs('user') ? 'show' : ' ' }}
         {{ request()->routeIs('user-create') ? 'show' : ' ' }}
-        {{ request()->routeIs('apartment-info') ? 'show' : ' ' }}
         {{ request()->routeIs('service-types') ? 'show' : ' ' }}
 
         " id="adminSubmenu">
                 <li class="{{ request()->routeIs('company-info') ? 'active' : ' ' }}">
                     <a class="list" wire:navigate href="{{ route('company-info') }}"> - Company Info</a>
                 </li>
-                <li class="{{ request()->routeIs('apartment-info') ? 'active' : ' ' }}">
-                    <a class="list" wire:navigate href="{{ route('apartment-info') }}"> - Appertment Info</a>
-                </li>
+
                 <li class="{{ request()->routeIs('service-types') ? 'active' : ' ' }}">
                     <a class="list" wire:navigate href="{{ route('service-types') }}"> - Service Type</a>
                 </li>
@@ -104,6 +101,11 @@
 
             </ul>
         </li>
+
+        <li class="{{ request()->routeIs('apartment-info') ? 'active' : ' ' }}">
+            <a wire:navigate href="{{ route('apartment-info') }}"> <i class="fas fa-house-chimney"></i> Appertment
+                Info</a>
+        </li>
         <li class="{{ request()->routeIs('service-bill-info') ? 'active' : ' ' }}">
             <a wire:navigate href="{{ route('service-bill-info') }}"><i class="fas fa-dollar-sign"></i></i> Service Bill
                 Info</a>
@@ -111,7 +113,7 @@
         <li>
             <a href="#RPSubmenu" data-toggle="collapse" aria-expanded="true"
                 class="dropdown-toggle dropdown-custom-toggle main-list">
-                <i class="fa-solid fa-file-invoice" role="img" aria-label="Invoice"></i>
+                <i class="fas fa-hand-holding-dollar"></i>
                 Receive Payments
             </a>
             <ul class="collapse list-unstyled
@@ -128,18 +130,52 @@
 
             </ul>
         </li>
-        <li class="{{ request()->routeIs('service-bill-invoice-print') ? 'active' : ' ' }}">
-            <a wire:navigate href="{{ route('service-bill-invoice-print') }}"><i class="fas fa-print"
-                    aria-hidden="true"></i></i>Service Bill Invoice Print</a>
+        <li>
+            <a href="#ReportSubmenu" data-toggle="collapse" aria-expanded="true"
+                class="dropdown-toggle dropdown-custom-toggle main-list">
+                <i class="fa-solid fa-chart-line"></i>
+                Reports
+            </a>
+            <ul class="collapse list-unstyled
+        {{ request()->routeIs('service-payment-report') ? 'show' : ' ' }}
+        {{ request()->routeIs('service-due-report') ? 'show' : ' ' }}
+        {{ request()->routeIs('service-due-report-summary') ? 'show' : ' ' }}
+        {{ request()->routeIs('apartment-list-pdf') ? 'show' : ' ' }}
+        {{ request()->routeIs('customer-list-pdf') ? 'show' : ' ' }}
+        {{ request()->routeIs('money-receipt-print') ? 'show' : ' ' }}
+        {{ request()->routeIs('service-bill-invoice-print') ? 'show' : ' ' }}
+
+        " id="ReportSubmenu">
+                <li class="{{ request()->routeIs('service-bill-invoice-print') ? 'active' : ' ' }}">
+                    <a class="list" wire:navigate href="{{ route('service-bill-invoice-print') }}"> -
+                        Service Bill Invoice</a>
+                </li>
+                <li class="{{ request()->routeIs('money-receipt-print') ? 'active' : ' ' }}">
+                    <a class="list" wire:navigate href="{{ route('money-receipt-print') }}"> - Money Receipt</a>
+                </li>
+                <li class="{{ request()->routeIs('service-payment-report') ? 'active' : ' ' }}">
+                    <a class="list" wire:navigate href="{{ route('service-payment-report') }}"> - Payment Report</a>
+                </li>
+                <li class="{{ request()->routeIs('service-due-report') ? 'active' : ' ' }}">
+                    <a class="list" wire:navigate href="{{ route('service-due-report') }}"> - Service Due Report</a>
+                </li>
+                <li class="{{ request()->routeIs('service-due-report-summary') ? 'active' : ' ' }}">
+                    <a class="list" wire:navigate href="{{ route('service-due-report-summary') }}"> - Service Due Report
+                        Summary</a>
+                </li>
+                <li class="{{ request()->routeIs('apartment-list-pdf') ? 'active' : ' ' }}">
+                    <a target="_blank" class="list" href="{{ route('apartment-list-pdf') }}"> - Apartment List </a>
+                </li>
+                <li class="{{ request()->routeIs('customer-list-pdf') ? 'active' : ' ' }}">
+                    <a target="_blank" class="list" href="{{ route('customer-list-pdf') }}"> - Customer List </a>
+                </li>
+            </ul>
         </li>
 
-        <li class="{{ request()->routeIs('money-receipt-print') ? 'active' : ' ' }}">
-            <a wire:navigate href="{{route('money-receipt-print') }}"><i class="fas fa-print"
-                    aria-hidden="true"></i></i> Money Receipt Print</a>
-        </li>
 
         <li class="">
-            <a wire:navigate href=""><i class="fa fa-question-circle" aria-hidden="true"></i></i> Help</a>
+            <a href="https://www.infotechitsolutionsbd.com/contact"><i class="fa fa-question-circle"
+                    aria-hidden="true"></i></i> Help</a>
         </li>
     </ul>
 </nav>

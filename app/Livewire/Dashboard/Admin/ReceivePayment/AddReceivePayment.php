@@ -48,7 +48,6 @@ class AddReceivePayment extends Component
         ]);
         // dd($this->state);
         try {
-            // Insert electricity payment if amount provided
             if (!empty($this->state['amount']) && $this->state['amount'] > 0) {
                 DB::table('SRV_PAYMENT_RECEIPT')->insert([
                     'apartment_id' => $this->state['product_id'],

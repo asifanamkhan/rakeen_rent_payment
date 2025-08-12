@@ -22,6 +22,8 @@ class GeneratePdf
         $pdf->SetMargins(10, 52, 10);
         $pdf->SetHeaderMargin(3);
         $pdf->SetFooterMargin(3);
+        $pdf->setCellPadding(0);
+        $pdf->setCellMargins(0, 0, 0, 0);
 
         // Set auto page breaks
         $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);

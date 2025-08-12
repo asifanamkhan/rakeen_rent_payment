@@ -104,7 +104,7 @@ class AddServicePayment extends Component
             'paid_amount' => $this->state['service_payment_amount'],
             'paid_by' => Auth::user()->name,
             'service_type' => 1,
-            'money_receipt_no' => $this->state['money_receipt'],
+            'money_receipt_no' => $this->state['money_receipt'] ?? 0,
             'status' => 1,
         ], 'receipt_id');
 

@@ -13,6 +13,8 @@ use App\Livewire\Dashboard\Admin\ReceivePayment\AddReceivePayment;
 use App\Livewire\Dashboard\Admin\ReceivePayment\ReceivePayment;
 use App\Livewire\Dashboard\Admin\ReceivePayment\Service\AddServicePayment;
 use App\Livewire\Dashboard\Admin\ReceivePayment\Service\ServicePayment;
+use App\Livewire\Dashboard\Admin\ReceivePayment\ServiceDueReport;
+use App\Livewire\Dashboard\Admin\ReceivePayment\ServiceDueReportSummary;
 use App\Livewire\Dashboard\Admin\Role\{Role, RoleCreate, RoleDetails};
 use App\Livewire\Dashboard\Admin\Service\ServiceType;
 use App\Livewire\Dashboard\Admin\User\{User, UserCreate};
@@ -89,8 +91,22 @@ Route::middleware(['auth', 'verified', 'throttle:60,1'])->group(function () {
     // ------------- receive-payment end ----------------
 
     //--------------- Report -----------------------------
+    Route::get('apartment-list-pdf', [InvoiceController::class, 'apartment_list_pdf'])->name('apartment-list-pdf');
+    Route::get('customer-list-pdf', [InvoiceController::class, 'customer_list_pdf'])->name('customer-list-pdf');
     Route::get('service-bill-invoice/{bill_id}', [InvoiceController::class, 'service_bill_invoice'])->name('service-bill-invoice');
     Route::get('money-receipt-print-pdf/{receipt_id}/{type}', [InvoiceController::class, 'money_receipt_print'])->name('money-receipt-print-pdf');
+
+    // Service payment report (screen + PDF)
+    Route::get('service-payment-report', \App\Livewire\Dashboard\Admin\ReceivePayment\ServicePaymentReport::class)->name('service-payment-report');
+    Route::post('service-payment-report-pdf', [InvoiceController::class, 'service_payment_report_pdf'])->name('service-payment-report-pdf');
+
+    // Service Due Report (screen + PDF)
+    Route::get('service-due-report', ServiceDueReport::class)->name('service-due-report');
+    Route::post('service-due-report-pdf', [InvoiceController::class, 'service_due_report_pdf'])->name('service-due-report-pdf');
+
+    // Service Due Report Summary (screen + PDF)
+    Route::get('service-due-report-summary', ServiceDueReportSummary::class)->name('service-due-report-summary');
+    Route::post('service-due-report-summary-pdf', [InvoiceController::class, 'service_due_report_summary_pdf'])->name('service-due-report-summary-pdf');
 });
 
 

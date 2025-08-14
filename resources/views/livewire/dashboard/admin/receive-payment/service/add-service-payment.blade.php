@@ -81,20 +81,9 @@
                                 <tbody>
                                     @if (count($this->payment_details) > 0)
                                     <tr style="text-align: center">
-                                        <td>Previous Balance</td>
+                                        <td>Previous Due</td>
                                         <td style="text-align: right">
-
-                                                @if ($this->payment_details['opening'] < 0)
-                                                <span class="text-danger">
-                                                    (DUE)
-                                                </span>
-                                                @elseif ($this->payment_details['opening'] > 0)
-                                                <span class="text-success">
-                                                    (ADV) &nbsp;
-                                                </span>
-                                                @endif
-
-                                            {{ number_format(abs($this->payment_details['opening']), 2) }}
+                                            {{ number_format($this->payment_details['opening'], 2) }}
                                         </td>
                                     </tr>
 
@@ -105,7 +94,11 @@
                                             {{ Carbon\Carbon::parse($value->bill_month)->format('M, Y') }}
                                         </td>
                                         <td style="text-align: right">
+                                            @if ((float)$value->paid_amount > 0)
+                                            {{ number_format($value->tot_bill_amt - $value->paid_amount, 2) }}
+                                            @else
                                             {{ number_format($value->tot_bill_amt, 2) }}
+                                            @endif
                                         </td>
                                     </tr>
                                     @endforeach

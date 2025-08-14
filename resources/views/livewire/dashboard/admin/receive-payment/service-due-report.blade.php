@@ -89,7 +89,7 @@
                     </thead>
                     <tbody>
                         @php $total = 0; @endphp
-                        @foreach ($this->dues as $index => $row)
+                        @forelse ($this->dues as $index => $row)
                         @php $total += abs($row->paid_amount - $row->total_unpaid_amount); @endphp
                         <tr>
                             <td>{{ $index + 1 }}</td>
@@ -112,7 +112,11 @@
                             <td style="text-align: right">{{ number_format(( abs($row->paid_amount -
                                 $row->total_unpaid_amount) ), 2, '.', ',') }}</td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="6" style="text-align: center">No data found</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                     <tfoot>
                         <tr>

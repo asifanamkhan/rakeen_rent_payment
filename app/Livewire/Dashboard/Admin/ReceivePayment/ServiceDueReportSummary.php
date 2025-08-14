@@ -28,46 +28,53 @@ class ServiceDueReportSummary extends Component
     {
         $sql = "
             SELECT
-                b.PRODUCT_ID,
-                b.CUSTOMER_ID,
-                b.CUSTOMER_NAME,
-                b.PRODUCT_TYPE,
+                p.PRODUCT_ID,
+                p.CUSTOMER_ID,
+                p.CUSTOMER_NAME,
+                p.PRODUCT_TYPE,
+                LISTAGG(
+                    TO_CHAR(b.bill_month, 'MON, YYYY') || ' - ' || b.tot_bill_amt,
+                    ' | '
+                ) WITHIN GROUP (ORDER BY b.bill_month) AS unpaid_months_with_amounts,
                 SUM(b.tot_bill_amt) AS total_unpaid_amount,
-                r.paid_amount
-            FROM VW_SRV_APARTMENT_BILL_INFO b
-            LEFT JOIN SRV_PAYMENT_RECEIPT r
-                ON r.APARTMENT_ID = b.PRODUCT_ID
-                AND r.STATUS = 'OP'
-            WHERE b.STATUS = 'UNPAID'
+                NVL(p.paid_amount, 0) AS paid_amount
+            FROM VW_SRV_PAYMENT_INFO p
+            LEFT JOIN VW_SRV_APARTMENT_BILL_INFO b
+                ON b.PRODUCT_ID = p.PRODUCT_ID
+                AND b.STATUS = 'UNPAID'
+            WHERE p.STATUS = 'OP'
         ";
 
         $bindings = [];
 
         if ($this->product_id) {
-            $sql .= " AND b.PRODUCT_ID = :product_id";
+            $sql .= " AND p.PRODUCT_ID = :product_id";
             $bindings['product_id'] = $this->product_id;
         }
 
         if ($this->from_month) {
             $start = date('Y-m-01', strtotime($this->from_month . '-01'));
-            $sql .= " AND TRUNC(b.bill_month, 'MM') >= TO_DATE(:start_month, 'YYYY-MM-DD')";
+            $sql .= " AND (b.bill_month IS NULL OR TRUNC(b.bill_month, 'MM') >= TO_DATE(:start_month, 'YYYY-MM-DD'))";
             $bindings['start_month'] = $start;
         }
 
         if ($this->to_month) {
             $end = date('Y-m-t', strtotime($this->to_month . '-01'));
-            $sql .= " AND TRUNC(b.bill_month, 'MM') <= TO_DATE(:end_month, 'YYYY-MM-DD')";
+            $sql .= " AND (b.bill_month IS NULL OR TRUNC(b.bill_month, 'MM') <= TO_DATE(:end_month, 'YYYY-MM-DD'))";
             $bindings['end_month'] = $end;
         }
 
         $sql .= "
             GROUP BY
-                b.PRODUCT_ID,
-                b.CUSTOMER_ID,
-                b.CUSTOMER_NAME,
-                b.PRODUCT_TYPE,
-                r.paid_amount
-            ORDER BY b.PRODUCT_ID
+                p.PRODUCT_ID,
+                p.CUSTOMER_ID,
+                p.CUSTOMER_NAME,
+                p.PRODUCT_TYPE,
+                p.paid_amount
+            HAVING
+                COUNT(b.PRODUCT_ID) > 0 -- has unpaid
+                OR NVL(p.paid_amount, 0) <> 0 -- OR no unpaid but paid_amount != 0
+            ORDER BY p.PRODUCT_ID
         ";
 
         $bills = DB::select($sql, $bindings);

@@ -28,21 +28,28 @@ class ServiceDueReportSummary extends Component
     {
         $sql = "
             SELECT
-                p.PRODUCT_ID,
-                p.CUSTOMER_ID,
-                p.CUSTOMER_NAME,
-                p.PRODUCT_TYPE,
+                r.APARTMENT_ID AS PRODUCT_ID,
+                m.CUSTOMER_ID,
+                m.CUSTOMER_NAME,
+                m.PRODUCT_TYPE,
                 LISTAGG(
                     TO_CHAR(b.bill_month, 'MON, YYYY') || ' - ' || b.tot_bill_amt,
                     ' | '
                 ) WITHIN GROUP (ORDER BY b.bill_month) AS unpaid_months_with_amounts,
                 SUM(b.tot_bill_amt) AS total_unpaid_amount,
-                NVL(p.paid_amount, 0) AS paid_amount
-            FROM VW_SRV_PAYMENT_INFO p
+                NVL(r.paid_amount, 0) AS paid_amount
+            FROM SRV_PAYMENT_RECEIPT r
+            -- master info (one row per apartment)
+            LEFT JOIN (
+                SELECT PRODUCT_ID, CUSTOMER_ID, CUSTOMER_NAME, PRODUCT_TYPE
+                FROM VW_SRV_APARTMENT_BILL_INFO
+                GROUP BY PRODUCT_ID, CUSTOMER_ID, CUSTOMER_NAME, PRODUCT_TYPE
+            ) m ON m.PRODUCT_ID = r.APARTMENT_ID
+            -- unpaid bills only
             LEFT JOIN VW_SRV_APARTMENT_BILL_INFO b
-                ON b.PRODUCT_ID = p.PRODUCT_ID
+                ON b.PRODUCT_ID = r.APARTMENT_ID
                 AND b.STATUS = 'UNPAID'
-            WHERE p.STATUS = 'OP'
+            WHERE r.STATUS = 'OP'
         ";
 
         $bindings = [];
@@ -66,15 +73,15 @@ class ServiceDueReportSummary extends Component
 
         $sql .= "
             GROUP BY
-                p.PRODUCT_ID,
-                p.CUSTOMER_ID,
-                p.CUSTOMER_NAME,
-                p.PRODUCT_TYPE,
-                p.paid_amount
+                r.APARTMENT_ID,
+                m.CUSTOMER_ID,
+                m.CUSTOMER_NAME,
+                m.PRODUCT_TYPE,
+                r.paid_amount
             HAVING
-                COUNT(b.PRODUCT_ID) > 0 -- has unpaid
-                OR NVL(p.paid_amount, 0) <> 0 -- OR no unpaid but paid_amount != 0
-            ORDER BY p.PRODUCT_ID
+                COUNT(b.PRODUCT_ID) > 0
+                OR NVL(r.paid_amount, 0) <> 0
+            ORDER BY r.APARTMENT_ID
         ";
 
         $bills = DB::select($sql, $bindings);

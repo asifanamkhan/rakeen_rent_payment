@@ -13,16 +13,6 @@
     <div class="card p-4">
         <div class="row g-3 mb-3 align-items-center">
             <div class="col-auto">
-                <input type="text" wire:model.live.debounce.300ms='search' class="form-control" placeholder="search here">
-            </div>
-            <div class="col-auto">
-                <select class="form-select" wire:model.change='status' name="" id="">
-                    <option value="">Search status</option>
-                    <option value="PAID">PAID</option>
-                    <option value="UNPAID">UNPAID</option>
-                </select>
-            </div>
-            <div class="col-auto">
                 <select class="form-select" wire:model.live='pagination' name="" id="">
                     <option value="5">5</option>
                     <option value="10">10</option>
@@ -31,6 +21,18 @@
                     <option value="100">100</option>
                 </select>
             </div>
+
+            <div class="col-auto">
+                <select class="form-select" wire:model.change='status' name="" id="">
+                    <option value="">Search status</option>
+                    <option value="PAID">PAID</option>
+                    <option value="UNPAID">UNPAID</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <input type="text" wire:model.live.debounce.300ms='search' class="form-control" placeholder="search here">
+            </div>
+
         </div>
         <div class="responsive-table">
             <table class="table table-bordered table-hover">
@@ -48,6 +50,10 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        $bill_amount = 0;
+                        $paid_amount = 0;
+                    @endphp
                     @if (count($this->resultPayments) > 0)
                     @foreach ($this->resultPayments as $key => $data)
                     <tr wire:key='{{ $key }}'>
@@ -74,14 +80,23 @@
                                 Payment
                             </a>
                             @endif
-                            {{-- <a target="_blank" class="btn btn-sm btn-success" href="{{ route('service-bill-invoice', $data->bill_id) }}">
-                                Invoice
-                            </a> --}}
                         </td>
                     </tr>
                     @endforeach
                     @endif
                 </tbody>
+                <tfoot>
+                    @php
+                        $bill_amount = $this->resultPayments->sum('tot_bill_amt');
+                        $paid_amount = $this->resultPayments->sum('paid_amount');
+                    @endphp
+                    <tr>
+                        <th colspan="5" style="text-align: right">Total</th>
+                        <th style="text-align: center">{{ number_format($bill_amount, 2) }}</th>
+                        <th style="text-align: center">{{ number_format($paid_amount, 2) }}</th>
+                        <th colspan="2"></th>
+                    </tr>
+                </tfoot>
             </table>
         </div>
         <span>{{ $this->resultPayments->links() }}</span>

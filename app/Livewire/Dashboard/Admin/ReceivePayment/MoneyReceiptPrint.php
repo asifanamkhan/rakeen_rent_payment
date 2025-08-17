@@ -54,8 +54,7 @@ class MoneyReceiptPrint extends Component
             });
         }
 
-        return $bills->orderBy('bill_month', 'DESC')
-                    ->orderBy('product_id', 'ASC')
+        return $bills->orderBy('payment_date', 'DESC')
                     ->paginate($this->pagination);
     }
 

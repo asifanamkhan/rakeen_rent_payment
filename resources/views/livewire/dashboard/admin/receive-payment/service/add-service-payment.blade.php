@@ -62,6 +62,25 @@
                         <x-input required_mark='' wire:model='state.money_receipt' name="money_receipt" type='number'
                             label='Money Receipt' />
                     </div>
+                    <div class="mb-3 mt-3">
+                        <div class="form-group" wire:ignore>
+                            <label for="">Payment Method<span style="color: red"> * </span></label>
+                            <select required name="p_mode_id" class="form-select select2" id='p_mode_id'>
+                                <option value="">Select payment method</option>
+                                @forelse ($payment_methods as $payment)
+                                <option value="{{ $payment->p_mode_id }}">
+                                    {{ $payment->p_mode_name }}
+                                </option>
+                                @empty
+                                <option value="">No Payment methods found</option>
+                                @endforelse
+                            </select>
+                        </div>
+                        @error('product_id')
+                        <small class="form-text text-danger">{{ $message }}</small>
+                        @enderror
+                    </div>
+
                     <div class="mt-4 text-center">
                         <a style="background-color: #39A33C !important" wire:click='search_payment' class="btn btn-primary">
                             <i class="fas fa-search"></i> SEARCH
@@ -115,7 +134,7 @@
                                     <tr>
                                         <th style="text-align: center">Payment amount: </th>
                                         <td>
-                                            <input style="text-align: right" type="number" wire:blur='calculation'
+                                            <input step="0.01" style="text-align: right" type="number" wire:blur='calculation'
                                                 class="form-control clac" wire:model.lazy='state.service_payment_amount'>
                                                 <span style="color:#fb6e7a">*** after input press tab or click outside for calculation</span>
                                         </td>
@@ -161,6 +180,11 @@
     $('#product_id').on('change', function(e){
         @this.set('state.product_id', e.target.value, false);
     });
+
+    $('#p_mode_id').on('change', function(e){
+        @this.set('state.p_mode_id', e.target.value, false);
+    });
+
 
     document.getElementById('confirmationForm').addEventListener('submit', function (e) {
             e.preventDefault(); // Prevent the form from submitting automatically

@@ -96,6 +96,7 @@ class InvoiceController extends Controller
             ->get([
                 'p.bill_month',
                 'p.product_id',
+                'p.product_type',
                 'p.customer_id',
                 'p.customer_name',
                 'p.service_name',
@@ -161,14 +162,6 @@ class InvoiceController extends Controller
             'report_name' => 'MONEY RECEIPT',
         ];
         $report_name = 'MONEY RECEIPT';
-        // if($type == 'SERVICE'){
-        //     $report_name = 'SERVICE BILL INVOICE';
-        // }else if($type == 'ELECTRICITY'){
-        //     $report_name = 'ELECTRICITY BILL INVOICE';
-        // }else if($type == 'WATER'){
-        //     $report_name = 'WATER BILL INVOICE';
-        // }
-
         $html = view()->make('livewire.dashboard.reports.invoice.money-receipt', $data)->render();
         $pdf_data = [
             'html' => $html,
@@ -184,59 +177,23 @@ class InvoiceController extends Controller
         $fromMonth = $request->input('from_month');
         $toMonth = $request->input('to_month');
 
-        $sql = "
-            SELECT
-                p.PRODUCT_ID,
-                p.CUSTOMER_ID,
-                p.CUSTOMER_NAME,
-                p.PRODUCT_TYPE,
-                LISTAGG(
-                    TO_CHAR(b.bill_month, 'MON, YYYY') || ' - ' || b.tot_bill_amt,
-                    ' | '
-                ) WITHIN GROUP (ORDER BY b.bill_month) AS unpaid_months_with_amounts,
-                SUM(b.tot_bill_amt) AS total_unpaid_amount,
-                NVL(p.paid_amount, 0) AS paid_amount
-            FROM VW_SRV_PAYMENT_INFO p
-            LEFT JOIN VW_SRV_APARTMENT_BILL_INFO b
-                ON b.PRODUCT_ID = p.PRODUCT_ID
-                AND b.STATUS = 'UNPAID'
-            WHERE p.STATUS = 'OP'
-        ";
-
-
-        $bindings = [];
+        $sql = DB::table('VW_DUE_REPORT');
 
         if ($productId) {
-            $sql .= " AND b.PRODUCT_ID = :product_id";
-            $bindings['product_id'] = $productId;
+            $sql->where('product_id', $productId);
         }
 
         if ($fromMonth) {
             $start = date('Y-m-01', strtotime($fromMonth . '-01'));
-            $sql .= " AND TRUNC(b.bill_month, 'MM') >= TO_DATE(:start_month, 'YYYY-MM-DD')";
-            $bindings['start_month'] = $start;
+            $sql->where('bill_month', '>=', $start);
         }
 
         if ($toMonth) {
             $end = date('Y-m-t', strtotime($toMonth . '-01'));
-            $sql .= " AND TRUNC(b.bill_month, 'MM') <= TO_DATE(:end_month, 'YYYY-MM-DD')";
-            $bindings['end_month'] = $end;
+            $sql->where('bill_month', '<=', $end);
         }
 
-        $sql .= "
-            GROUP BY
-                p.PRODUCT_ID,
-                p.CUSTOMER_ID,
-                p.CUSTOMER_NAME,
-                p.PRODUCT_TYPE,
-                p.paid_amount
-            HAVING
-                COUNT(b.PRODUCT_ID) > 0 -- has unpaid
-                OR NVL(p.paid_amount, 0) <> 0 -- OR no unpaid but paid_amount != 0
-            ORDER BY p.PRODUCT_ID
-        ";
-
-        $rows = DB::select($sql, $bindings);
+        $rows = $sql->orderBy('product_id', 'ASC')->get();
 
         $filters = [
             'product_id' => $productId,

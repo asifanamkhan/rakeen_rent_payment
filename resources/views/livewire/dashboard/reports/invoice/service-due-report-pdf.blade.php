@@ -39,43 +39,63 @@
             <tr >
                 <th class="invoice-items-head"  style="width:5%">SL</th>
                 <th class="invoice-items-head"  style="width:15%">Apartment</th>
-                <th class="invoice-items-head"  style="width:30%">Customer</th>
-                <th class="invoice-items-head"  style="width:15%">Opening</th>
-                <th class="invoice-items-head" style="width:20%">Bill Month-AMT</th>
-                <th class="invoice-items-head" style="width:15%">Total Due</th>
+                <th class="invoice-items-head"  style="width:20%">Customer</th>
+                <th class="invoice-items-head"  style="width:15%; text-align:center">Prev. Dues</th>
+                <th class="invoice-items-head" style="width:30%; text-align:center">Bill Month-AMT</th>
+                <th class="invoice-items-head" style="width:15%; text-align:center">Total Due</th>
             </tr>
         </thead>
         <tbody>
             @php
                 $total = 0;
-                $total_op = 0;
+                $m_total = 0;
+                $o_total = 0;
             @endphp
             @forelse ($rows as $row)
                 @php
-                    $total += abs($row->paid_amount - $row->total_unpaid_amount);
-                    $total_op += abs($row->paid_amount);
+                    $total += $row->opening + $row->total_unpaid_amount;
+                    $o_total += $row->opening;
                 @endphp
                 <tr style="page-break-inside: avoid">
                     <td style="width: 5%">{{ $loop->iteration }}</td>
                     <td style="width: 15%">{{ $row->product_id }} ({{ $row->product_type }})</td>
-                    <td style="width: 30%">{{ $row->customer_name }} ({{ $row->customer_id }})</td>
+                    <td style="width: 20%">{{ $row->customer_name }} ({{ $row->customer_id }})</td>
                     <td style="width: 15%;text-align: right">
-                        @if ($row->paid_amount >0)
-                        (ADV)
-                        @endif
-                        {{ number_format(abs($row->paid_amount), 1, '.', ',') }}
+                        {{ number_format($row->opening, 1, '.', ',') }}
                     </td>
-                    <td style="width: 20%;text-align: right">
+                    <td style="text-align: center; width: 30%">
                         @php
-                            $months = explode('|', $row->unpaid_months_with_amounts);
-                         @endphp
-                        @if (count($months) > 0)
-                            @foreach ($months as $month)
-                                {{ $month }}<br>
+                            $m_t = 0;
+                            $months = explode('|',$row->unpaid_months_with_amounts);
+                        @endphp
+                        @if (count($months) > 1)
+                        <table style="width: 100%">
+                            <tbody>
+                                @foreach ($months as $month)
+                                @php
+                                    $month_t = explode('-',$month);
+                                    $m_t += (float) $month_t[1];
+                                    $m_total += (float) $month_t[1];
+                                @endphp
+                                <tr>
+                                    <td>{{ $month_t[0] }}</td>
+                                    <td style="text-align: right">{{ $month_t[1] }}</td>
+                                </tr>
                             @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr style="border-top: 1px solid; font-weight: bold">
+                                    <th>Total</th>
+                                    <th style="text-align: right">{{ number_format($m_t, 0, '.', ',') }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        @else
+                        <span class="badge bg-success">Cleared</span>
                         @endif
+
                     </td>
-                    <td style="width: 15%;text-align: right">{{ number_format(abs($row->paid_amount - $row->total_unpaid_amount), 1, '.', ',') }}</td>
+                    <td style="width: 15%;text-align: right">{{ number_format(abs($row->opening + $row->total_unpaid_amount), 1, '.', ',') }}</td>
                 </tr>
             @empty
                 <tr>
@@ -83,8 +103,9 @@
                 </tr>
             @endforelse
             <tr>
-                <td colspan="4" style="text-align: right"><b>Total:</b></td>
-                <td style="text-align: right"><b>{{ number_format($total_op, 1, '.', ',') }}</b></td>
+                <td colspan="3" style="text-align: right"><b>Total:</b></td>
+                <td style="text-align: right"><b>{{ number_format($o_total, 1, '.', ',') }}</b></td>
+                <td style="text-align: right"><b>{{ number_format($m_total, 0, '.', ',') }}</b></td>
                 <td style="text-align: right"><b>{{ number_format($total, 1, '.', ',') }}</b></td>
             </tr>
         </tbody>

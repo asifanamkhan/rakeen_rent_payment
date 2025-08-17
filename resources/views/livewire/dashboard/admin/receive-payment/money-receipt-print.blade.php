@@ -15,12 +15,12 @@
     <div class="card p-4">
         <!-- Search Filters -->
         <form wire:submit="search_report">
-            <div class="row mb-4">
+            <div class="row mb-3">
                 <div class="col-md-3">
                     <div class="form-group" wire:ignore>
-                        <label for="">Select Apartment<span style="color: red"> * </span></label>
+                        <label for="">Select Apartment</label>
                         <select name="product_id" class="form-select select2" id='product_id'>
-                            <option value="">Select </option>
+                            <option value="">All Apartment </option>
                             @forelse ($products as $product)
                             <option value="{{ $product->product_id }}">
                                 {{ $product->product_id }}
@@ -35,11 +35,11 @@
                 </div>
                 <div class="col-md-3">
                     <x-input required_mark='' wire:model='from_month' name='from_month' type='date'
-                        label='From Date' />
+                        label='From Payment Date' />
                 </div>
 
                 <div class="col-md-3">
-                    <x-input required_mark='' wire:model='to_month' name='to_month' type='date' label='To Date' />
+                    <x-input required_mark='' wire:model='to_month' name='to_month' type='date' label='To Payment Date' />
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
@@ -52,30 +52,28 @@
                         </select>
                     </div>
                 </div>
-                <div style="display: flex; justify-content: center; gap:10px">
-                    <div class=" ">
-                        <button class="btn btn-primary">Search</button>
+                <div style="display: flex; justify-content: space-between;">
+                    <div style="">
+                        <select class="form-select" wire:model.live='pagination'>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
                     </div>
                     <div class=" ">
-                        <button type="button" wire:click="resetFilters" class="btn btn-secondary">Reset</button>
+                        <button class="btn btn-primary">
+                           <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    <div class=" ">
+                        <button type="button" wire:click="resetFilters" class="btn btn-warning">
+                            <i class="fas fa-refresh"></i> Reset
+                        </button>
                     </div>
                 </div>
             </div>
         </form>
-
-        <!-- Filter Actions -->
-        <div class="row mb-3">
-            <div class="col-12">
-                <div class="float-end">
-                    <select class="form-select form-select-sm d-inline-block w-auto" wire:model.live='pagination'>
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
-                </div>
-            </div>
-        </div>
 
         <!-- Results Table -->
         <div class="responsive-table">
@@ -93,6 +91,9 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        $paidAmount = 0;
+                    @endphp
                     @if (count($this->resultBills) > 0)
                     @foreach ($this->resultBills as $key => $data)
                     <tr wire:key='{{ $key }}'>
@@ -156,11 +157,21 @@
                     </tr>
                     @endif
                 </tbody>
+                @php
+                    $paidAmount = $this->resultBills->sum('paid_amount');
+                @endphp
+                <tfoot>
+                    <tr>
+                        <th colspan="5" style="text-align: right">Total</th>
+                        <th style="text-align: right">{{ number_format($paidAmount, 2) }}</th>
+                        <th colspan="2"></th>
+                    </tr>
+                </tfoot>
             </table>
         </div>
 
         <!-- Pagination -->
-        <div class="d-flex justify-content-center">
+        <div class="">
             {{ $this->resultBills->links() }}
         </div>
     </div>

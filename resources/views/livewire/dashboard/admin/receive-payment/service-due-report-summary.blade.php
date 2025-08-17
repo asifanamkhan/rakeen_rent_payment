@@ -81,28 +81,38 @@
                             <td style="width: 5%">#</td>
                             <td style="width: 20%">Apartment</td>
                             <td style="width: 35%">Customer</td>
-                            <td style="width: 15%">Amount</td>
-                            <td style="width: 10%">Opening</td>
+                            <td style="width: 10%; text-align: center">Prev. Dues</td>
+                            <td style="width: 15%; text-align: center">Bill Amount</td>
                             <td style="text-align: right;width: 10%">Total Due</td>
                         </tr>
                     </thead>
                     <tbody>
-                        @php $total = 0; @endphp
+                        @php
+                            $total = 0;
+                            $m_total = 0;
+                            $o_total = 0;
+                        @endphp
                         @foreach ($this->dues as $index => $row)
-                        @php $total += abs($row->paid_amount - $row->total_unpaid_amount); @endphp
+                        @php
+                            $total += ($row->paid_amount + $row->total_unpaid_amount);
+                            $o_total += $row->paid_amount;
+                            $m_total += $row->total_unpaid_amount;
+                        @endphp
                         <tr>
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $row->product_id }} ({{ $row->product_type }})</td>
                             <td>{{ $row->customer_name }} ({{ $row->customer_id }})</td>
-                            <td style="text-align: right">{{ number_format($row->total_unpaid_amount, 2, '.', ',') }}</td>
                             <td style="text-align: right">{{ number_format(abs($row->paid_amount),2) }}</td>
-                            <td style="text-align: right">{{ number_format(( abs($row->paid_amount - $row->total_unpaid_amount)  ), 2, '.', ',') }}</td>
+                            <td style="text-align: right">{{ number_format($row->total_unpaid_amount, 2, '.', ',') }}</td>
+                            <td style="text-align: right">{{ number_format(($row->paid_amount + $row->total_unpaid_amount ), 2, '.', ',') }}</td>
                         </tr>
                         @endforeach
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="5" style="text-align: right">Total:</th>
+                            <th colspan="3" style="text-align: right">Total:</th>
+                            <th style="text-align: right">{{ number_format($o_total, 2, '.', ',') }}</th>
+                            <th style="text-align: right">{{ number_format($m_total, 2, '.', ',') }}</th>
                             <th style="text-align: right">{{ number_format($total, 2, '.', ',') }}</th>
                         </tr>
                     </tfoot>

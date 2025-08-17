@@ -11,12 +11,13 @@ use Livewire\Attributes\On;
 class AddServicePayment extends Component
 {
     public $state = [];
-    public $products;
+    public $products, $payment_methods;
     public $payment_details = [];
 
     public function mount($product_id = null)
     {
         $this->productsAll();
+        $this->payMode();
         $this->state['payment_date'] = date('Y-m-d');
         $this->state['bill_month'] = date('Y-m');
         $this->state['total_bill'] = 0;
@@ -35,6 +36,13 @@ class AddServicePayment extends Component
     {
         return $this->products = DB::table('SRV_APARTMENT_INFO')
             ->orderBy('product_id', 'DESC')
+            ->get();
+    }
+
+    public function payMode()
+    {
+        return $this->payment_methods = DB::table('ACC_PAYMENT_MODE')
+            ->orderBy('p_mode_id', 'DESC')
             ->get();
     }
 
@@ -115,6 +123,7 @@ class AddServicePayment extends Component
             'service_type' => 1,
             'money_receipt_no' => $this->state['money_receipt'] ?? 0,
             'status' => 1,
+            'payment_mode' => $this->state['p_mode_id'],
         ], 'receipt_id');
 
         $rest_amount = $this->state['service_payment_amount'];

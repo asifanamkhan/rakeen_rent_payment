@@ -57,9 +57,9 @@
         </form>
         @if (count($this->dues) > 0)
         <div>
-            <div style="display: flex; justify-content: space-between" class="p-2">
+            <div style="display: flex; justify-content: space-between" class="pt-2 pb-2">
                 <div style="float: left">
-                    <select class="form-select form-select-sm d-inline-block w-auto" wire:model.live='pagination'>
+                    <select class="form-select form-select-sm" wire:model.live='pagination'>
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
@@ -67,14 +67,24 @@
                         <option value="all">All</option>
                     </select>
                 </div>
-                <div style="float: right">
+
+                <div style="display:flex ;gap:10px">
+                    <form target="_blank" action="{{ route('service.due.report.excel') }}" method="get">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product_id }}">
+                        <input type="hidden" name="from_month" value="{{ $from_month }}">
+                        <input type="hidden" name="to_month" value="{{ $to_month }}">
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fa-solid fa-file-excel"></i> EXCEL
+                        </button>
+                    </form>
                     <form target="_blank" action="{{ route('service-due-report-pdf') }}" method="post">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product_id }}">
                         <input type="hidden" name="from_month" value="{{ $from_month }}">
                         <input type="hidden" name="to_month" value="{{ $to_month }}">
                         <button class="btn btn-sm btn-success">
-                            <i class="fa-solid fa-file-pdf"></i> Generate PDF
+                            <i class="fa-solid fa-file-pdf"></i> PDF
                         </button>
                     </form>
                 </div>

@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Service\CustomTcPDFHF;
+
 use App\Service\GeneratePdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Service\Excel as ServiceExcel;
 
 class InvoiceController extends Controller
 {
@@ -220,51 +221,23 @@ class InvoiceController extends Controller
         $fromMonth = $request->input('from_month');
         $toMonth = $request->input('to_month');
 
-        $sql = "
-            SELECT
-                b.PRODUCT_ID,
-                b.CUSTOMER_ID,
-                b.CUSTOMER_NAME,
-                b.PRODUCT_TYPE,
-                SUM(b.tot_bill_amt) AS total_unpaid_amount,
-                r.paid_amount
-            FROM VW_SRV_APARTMENT_BILL_INFO b
-            LEFT JOIN SRV_PAYMENT_RECEIPT r
-                ON r.APARTMENT_ID = b.PRODUCT_ID
-                AND r.STATUS = 'OP'
-            WHERE b.STATUS = 'UNPAID'
-        ";
-
-        $bindings = [];
+        $sql = DB::table('VW_DUE_REPORT');
 
         if ($productId) {
-            $sql .= " AND b.PRODUCT_ID = :product_id";
-            $bindings['product_id'] = $productId;
+            $sql->where('product_id', $productId);
         }
 
         if ($fromMonth) {
             $start = date('Y-m-01', strtotime($fromMonth . '-01'));
-            $sql .= " AND TRUNC(b.bill_month, 'MM') >= TO_DATE(:start_month, 'YYYY-MM-DD')";
-            $bindings['start_month'] = $start;
+            $sql->where('bill_month', '>=', $start);
         }
 
         if ($toMonth) {
             $end = date('Y-m-t', strtotime($toMonth . '-01'));
-            $sql .= " AND TRUNC(b.bill_month, 'MM') <= TO_DATE(:end_month, 'YYYY-MM-DD')";
-            $bindings['end_month'] = $end;
+            $sql->where('bill_month', '<=', $end);
         }
 
-        $sql .= "
-            GROUP BY
-                b.PRODUCT_ID,
-                b.CUSTOMER_ID,
-                b.CUSTOMER_NAME,
-                b.PRODUCT_TYPE,
-                r.paid_amount
-            ORDER BY b.PRODUCT_ID
-        ";
-
-        $rows = DB::select($sql, $bindings);
+        $rows = $sql->orderBy('product_id', 'ASC')->get();
 
         $filters = [
             'product_id' => $productId,
@@ -283,5 +256,335 @@ class InvoiceController extends Controller
         ];
 
         GeneratePdf::generate($pdf_data, 'SERVICE DUE REPORT SUMMARY');
+    }
+
+    public function service_due_report_csv(Request $request)
+    {
+        $productId = $request->input('product_id');
+        $fromMonth = $request->input('from_month');
+        $toMonth = $request->input('to_month');
+
+        $sql = DB::table('VW_DUE_REPORT');
+
+        if ($productId) {
+            $sql->where('product_id', $productId);
+        }
+
+        if ($fromMonth) {
+            $start = date('Y-m-01', strtotime($fromMonth . '-01'));
+            $sql->where('bill_month', '>=', $start);
+        }
+
+        if ($toMonth) {
+            $end = date('Y-m-t', strtotime($toMonth . '-01'));
+            $sql->where('bill_month', '<=', $end);
+        }
+
+        $rows = $sql->orderBy('product_id', 'ASC')->get();
+
+        // Generate CSV content
+        $filename = 'service-due-report-' . date('Y-m-d-H-i-s') . '.csv';
+
+        // Start building CSV content
+        $csv_content = [];
+
+        // Title row
+        $csv_content[] = ['SERVICE DUE REPORT '];
+
+        // Filter information
+        $filter_text = 'Generated: ' . date('F d, Y g:i A');
+        if (!empty($request->input('product_id'))) {
+            $filter_text .= ' | Product ID: ' . $request->input('product_id');
+        }
+        if (!empty($request->input('from_month'))) {
+            $filter_text .= ' | From: ' . $request->input('from_month');
+        }
+        if (!empty($request->input('to_month'))) {
+            $filter_text .= ' | To: ' . $request->input('to_month');
+        }
+        $csv_content[] = [$filter_text];
+        $csv_content[] = []; // Empty row
+
+        // Headers
+        $csv_content[] = [
+            'SL',
+            'Apartment',
+            'Customer',
+            'Prev. Dues',
+            'Monthly Bills Details',
+            'Monthly Total',
+            'Total Due'
+        ];
+
+        // Process data
+        $total_opening = 0;
+        $total_monthly = 0;
+        $grand_total = 0;
+
+        foreach ($rows as $index => $row) {
+            $total_opening += $row->opening ?? 0;
+            $total_monthly += $row->total_unpaid_amount ?? 0;
+            $grand_total += ($row->opening ?? 0) + ($row->total_unpaid_amount ?? 0);
+
+            $month_details = ($row->unpaid_months_with_amounts == ' - ') ? 'CLEARED' : $row->unpaid_months_with_amounts;
+            $month_total = $row->total_unpaid_amount;
+
+            $csv_content[] = [
+                $index + 1,
+                $row->product_id . ' (' . $row->product_type . ')',
+                $row->customer_name . ' (' . $row->customer_id . ')',
+                number_format($row->opening ?? 0, 0, '.', ','),
+                $month_details,
+                number_format($month_total, 0, '.', ','),
+                number_format(abs(($row->opening ?? 0) + ($row->total_unpaid_amount ?? 0)), 0, '.', ',')
+            ];
+        }
+
+        // Add total row
+        $csv_content[] = []; // Empty row
+        $csv_content[] = [
+            '',
+            '',
+            'GRAND TOTAL',
+            number_format($total_opening, 0, '.', ','),
+            'All Monthly Bills',
+            number_format($total_monthly, 0, '.', ','),
+            number_format(abs($grand_total), 0, '.', ',')
+        ];
+
+        // Convert array to CSV string
+        $output = '';
+        foreach ($csv_content as $row) {
+            $output .= '"' . implode('","', $row) . '"' . "\n";
+        }
+
+        return ServiceExcel::export($output, $filename);
+    }
+
+    // app/Http/Controllers/InvoiceController.php
+
+    public function service_due_summary_report_csv(Request $request)
+    {
+        $productId = $request->input('product_id');
+        $fromMonth = $request->input('from_month');
+        $toMonth = $request->input('to_month');
+
+        $sql = DB::table('VW_DUE_REPORT');
+
+        if ($productId) {
+            $sql->where('product_id', $productId);
+        }
+
+        if ($fromMonth) {
+            $start = date('Y-m-01', strtotime($fromMonth . '-01'));
+            $sql->where('bill_month', '>=', $start);
+        }
+
+        if ($toMonth) {
+            $end = date('Y-m-t', strtotime($toMonth . '-01'));
+            $sql->where('bill_month', '<=', $end);
+        }
+
+        $rows = $sql->orderBy('product_id', 'ASC')->get();
+
+        // Generate CSV content
+        $filename = 'service-due-report-' . date('Y-m-d-H-i-s') . '.csv';
+
+        // Start building CSV content
+        $csv_content = [];
+
+        // Title row
+        $csv_content[] = ['SERVICE DUE REPORT '];
+
+        // Filter information
+        $filter_text = 'Generated: ' . date('F d, Y g:i A');
+        if (!empty($request->input('product_id'))) {
+            $filter_text .= ' | Product ID: ' . $request->input('product_id');
+        }
+        if (!empty($request->input('from_month'))) {
+            $filter_text .= ' | From: ' . $request->input('from_month');
+        }
+        if (!empty($request->input('to_month'))) {
+            $filter_text .= ' | To: ' . $request->input('to_month');
+        }
+        $csv_content[] = [$filter_text];
+        $csv_content[] = []; // Empty row
+
+        // Headers
+        $csv_content[] = [
+            'SL',
+            'Apartment',
+            'Customer',
+            'Prev. Dues',
+            'Monthly Dues',
+            'Total Due'
+        ];
+
+        // Process data
+        $total_opening = 0;
+        $total_monthly = 0;
+        $grand_total = 0;
+
+        foreach ($rows as $index => $row) {
+            $total_opening += $row->opening ?? 0;
+            $total_monthly += $row->total_unpaid_amount ?? 0;
+            $grand_total += ($row->opening ?? 0) + ($row->total_unpaid_amount ?? 0);
+
+
+            $month_total = $row->total_unpaid_amount;
+
+            $csv_content[] = [
+                $index + 1,
+                $row->product_id . ' (' . $row->product_type . ')',
+                $row->customer_name . ' (' . $row->customer_id . ')',
+                number_format($row->opening ?? 0, 0, '.', ','),
+                number_format($month_total, 0, '.', ','),
+                number_format(abs(($row->opening ?? 0) + ($row->total_unpaid_amount ?? 0)), 0, '.', ',')
+            ];
+        }
+
+        // Add total row
+        $csv_content[] = []; // Empty row
+        $csv_content[] = [
+            '',
+            '',
+            'GRAND TOTAL',
+            number_format($total_opening, 0, '.', ','),
+            number_format($total_monthly, 0, '.', ','),
+            number_format(abs($grand_total), 0, '.', ',')
+        ];
+
+        // Convert array to CSV string
+        $output = '';
+        foreach ($csv_content as $row) {
+            $output .= '"' . implode('","', $row) . '"' . "\n";
+        }
+
+        return ServiceExcel::export($output, $filename);
+    }
+
+    // app/Http/Controllers/InvoiceController.php
+
+    public function service_payment_report_excel(Request $request)
+    {
+        $productId = $request->input('product_id');
+        $fromMonth = $request->input('from_month');
+        $toMonth = $request->input('to_month');
+        $serviceType = $request->input('service_type');
+
+        $query = DB::table('VW_SRV_PAYMENT_INFO as p')
+            ->where('p.status', 1);
+
+        if ($productId) {
+            $query->where('p.product_id', $productId);
+        }
+
+        if ($serviceType) {
+            $query->where('p.service_name', $serviceType);
+        }
+
+        if ($fromMonth) {
+            $start = date('Y-m-01', strtotime($fromMonth . '-01'));
+            $query->where('p.bill_month', '>=', $start);
+        }
+
+        if ($toMonth) {
+            $end = date('Y-m-t', strtotime($toMonth . '-01'));
+            $query->where('p.bill_month', '<=', $end);
+        }
+
+        $rows = $query->orderBy('p.bill_month', 'DESC')
+            ->orderBy('p.product_id', 'ASC')
+            ->get([
+                'p.bill_month',
+                'p.product_id',
+                'p.product_type',
+                'p.customer_id',
+                'p.customer_name',
+                'p.service_name',
+                'p.auto_receipt_no',
+                'p.paid_amount',
+                'p.payment_date',
+            ]);
+
+
+        // Generate Excel content
+        $filename = 'service-payment-report-' . date('Y-m-d-H-i-s') . '.csv';
+
+        // Start building Excel content
+        $excel_content = [];
+
+        // Title row
+        $excel_content[] = ['SERVICE PAYMENT REPORT '];
+
+        // Filter information
+        $filter_text = 'Generated: ' . date('F d, Y g:i A');
+        if (!empty($request->input('product_id'))) {
+            $filter_text .= ' | Product ID: ' . $request->input('product_id');
+        }
+        if (!empty($request->input('from_month'))) {
+            $filter_text .= ' | From: ' . $request->input('from_month');
+        }
+        if (!empty($request->input('to_month'))) {
+            $filter_text .= ' | To: ' . $request->input('to_month');
+        }
+        if (!empty($request->input('service_type'))) {
+            $filter_text .= ' | Service Type: ' . $request->input('service_type');
+        }
+        $excel_content[] = [$filter_text];
+        $excel_content[] = []; // Empty row
+
+        // Headers
+        $csv_content[] = [
+            'SL',
+            'Bill Month',
+            'Product ID',
+            'Product Type',
+            'Customer ID',
+            'Customer Name',
+            'Service Name',
+            'Auto Receipt No',
+            'Paid Amount',
+            'Payment Date',
+        ];
+    $total_opening = 0;
+        // Data rows
+        foreach ($rows as $key => $row) {
+            $total_opening += $row->paid_amount;
+            $csv_content[] = [
+                $key+1,
+                date('M Y', strtotime($row->bill_month)),
+                $row->product_id,
+                $row->product_type,
+                $row->customer_id,
+                $row->customer_name,
+                $row->service_name,
+                $row->auto_receipt_no,
+                $row->paid_amount,
+                date('d M Y', strtotime($row->payment_date)),
+            ];
+        }
+
+        // Add total row
+        $csv_content[] = []; // Empty row
+        $csv_content[] = [
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            'TOTAL',
+            number_format($total_opening, 0, '.', ','),
+        ];
+
+        // Convert array to CSV string
+        $output = '';
+        foreach ($csv_content as $row) {
+            $output .= '"' . implode('","', $row) . '"' . "\n";
+        }
+
+        return ServiceExcel::export($output, $filename);
     }
 }

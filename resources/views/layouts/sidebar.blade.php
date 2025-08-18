@@ -160,7 +160,7 @@
                     <a class="list" wire:navigate href="{{ route('service-due-report') }}"> - Service Due Report</a>
                 </li>
                 <li class="{{ request()->routeIs('service-due-report-summary') ? 'active' : ' ' }}">
-                    <a class="list" wire:navigate href="{{ route('service-due-report-summary') }}"> - Service Due Report
+                    <a class="list" wire:navigate href="{{ route('service-due-report-summary') }}"> - Service Due
                         Summary</a>
                 </li>
                 <li class="{{ request()->routeIs('apartment-list-pdf') ? 'active' : ' ' }}">

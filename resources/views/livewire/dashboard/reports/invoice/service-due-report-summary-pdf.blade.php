@@ -40,7 +40,7 @@
                 <th class="invoice-items-head"  style="width:5%">SL</th>
                 <th class="invoice-items-head"  style="width:20%">Apartment</th>
                 <th class="invoice-items-head"  style="width:30%">Customer</th>
-                <th class="invoice-items-head"  style="width:15%">Opening</th>
+                <th class="invoice-items-head"  style="width:15%">Prev. Due</th>
                 <th class="invoice-items-head" style="width:15%">Bill Amount</th>
                 <th class="invoice-items-head" style="width:15%">Total Due</th>
             </tr>
@@ -52,22 +52,19 @@
             @endphp
             @forelse ($rows as $row)
                 @php
-                    $total += abs($row->paid_amount - $row->total_unpaid_amount);
-                    $total_op += abs($row->paid_amount);
+                    $total += ($row->opening + $row->total_unpaid_amount);
+                    $total_op += abs($row->opening);
                 @endphp
                 <tr style="page-break-inside: avoid">
                     <td style="width: 5%">{{ $loop->iteration }}</td>
                     <td style="width: 20%">{{ $row->product_id }} ({{ $row->product_type }})</td>
                     <td style="width: 30%">{{ $row->customer_name }} ({{ $row->customer_id }})</td>
                     <td style="width: 15%;text-align: right">
-                        @if ($row->paid_amount >0)
-                        (ADV)
-                        @endif
-                        {{ number_format(abs($row->paid_amount), 1, '.', ',') }}
+                        {{ number_format(abs($row->opening), 1, '.', ',') }}
                     </td>
                     <td style="width: 15%;text-align: right">
                         {{ number_format($row->total_unpaid_amount, 1, '.', ',') }}</td>
-                    <td style="width: 15%;text-align: right">{{ number_format(abs($row->paid_amount - $row->total_unpaid_amount), 1, '.', ',') }}</td>
+                    <td style="width: 15%;text-align: right">{{ number_format(($row->opening + $row->total_unpaid_amount), 1, '.', ',') }}</td>
                 </tr>
             @empty
                 <tr>

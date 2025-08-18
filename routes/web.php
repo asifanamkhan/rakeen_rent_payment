@@ -107,6 +107,15 @@ Route::middleware(['auth', 'verified', 'throttle:60,1'])->group(function () {
     // Service Due Report Summary (screen + PDF)
     Route::get('service-due-report-summary', ServiceDueReportSummary::class)->name('service-due-report-summary');
     Route::post('service-due-report-summary-pdf', [InvoiceController::class, 'service_due_report_summary_pdf'])->name('service-due-report-summary-pdf');
+
+    Route::get('service-due-report-excel', [InvoiceController::class, 'service_due_report_csv'])->name('service.due.report.excel');
+    // routes/web.php
+
+    Route::get('/service-due-summary-report-csv', [InvoiceController::class, 'service_due_summary_report_csv'])->name('service.due.summary.report.csv');
+
+    // routes/web.php
+
+    Route::get('/service-payment-report-excel', [InvoiceController::class, 'service_payment_report_excel'])->name('service.payment.report.excel');
 });
 
 

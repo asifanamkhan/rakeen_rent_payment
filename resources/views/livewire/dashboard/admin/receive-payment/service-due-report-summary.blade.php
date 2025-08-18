@@ -10,7 +10,8 @@
         <nav aria-label="breadcrumb" style="padding-right: 5px">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="#">Reports</a></li>
-                <li class="breadcrumb-item active"><a wire:navigate href="" style="color: #3C50E0">Service Due Report Summary</a></li>
+                <li class="breadcrumb-item active"><a wire:navigate href="" style="color: #3C50E0">Service Due Report
+                        Summary</a></li>
             </ol>
         </nav>
     </div>
@@ -53,28 +54,38 @@
         </form>
         @if (count($this->dues) > 0)
         <div>
-            <div style="display: flex; justify-content: space-between" class="p-2">
-                {{-- <div style="float: left">
-                    <select class="form-select form-select-sm d-inline-block w-auto" wire:model.live='pagination'>
+            <div style="display: flex; justify-content: space-between" class="pt-2 pb-2">
+                <div style="float: left">
+                    <select class="form-select " wire:model.live='pagination'>
                         <option value="10">10</option>
                         <option value="25">25</option>
                         <option value="50">50</option>
                         <option value="100">100</option>
+                        <option value="all">All</option>
                     </select>
-                </div> --}}
-                <div style="float: right">
+                </div>
+                <div style="display:flex ;gap:10px">
+                    <form target="_blank" action="{{ route('service.due.summary.report.csv') }}" method="get">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $product_id }}">
+                        <input type="hidden" name="from_month" value="{{ $from_month }}">
+                        <input type="hidden" name="to_month" value="{{ $to_month }}">
+                        <button class="btn btn-sm btn-primary">
+                            <i class="fa-solid fa-file-excel"></i> EXCEL
+                        </button>
+                    </form>
                     <form target="_blank" action="{{ route('service-due-report-summary-pdf') }}" method="post">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $product_id }}">
                         <input type="hidden" name="from_month" value="{{ $from_month }}">
                         <input type="hidden" name="to_month" value="{{ $to_month }}">
                         <button class="btn btn-sm btn-success">
-                            <i class="fa-solid fa-file-pdf"></i> Generate PDF
+                            <i class="fa-solid fa-file-pdf"></i> PDF
                         </button>
                     </form>
                 </div>
             </div>
-            <div class="responsive-table" style="font-size: 0.9em !important; max-height: 500px; overflow-y: scroll">
+            <div class="responsive-table" style="font-size: 0.9em !important;">
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr class="bg-sidebar">
@@ -88,23 +99,25 @@
                     </thead>
                     <tbody>
                         @php
-                            $total = 0;
-                            $m_total = 0;
-                            $o_total = 0;
+                        $total = 0;
+                        $m_total = 0;
+                        $o_total = 0;
                         @endphp
                         @foreach ($this->dues as $index => $row)
                         @php
-                            $total += ($row->paid_amount + $row->total_unpaid_amount);
-                            $o_total += $row->paid_amount;
-                            $m_total += $row->total_unpaid_amount;
+                        $total += ($row->opening + $row->total_unpaid_amount);
+                        $o_total += $row->opening;
+                        $m_total += $row->total_unpaid_amount;
                         @endphp
                         <tr>
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $row->product_id }} ({{ $row->product_type }})</td>
                             <td>{{ $row->customer_name }} ({{ $row->customer_id }})</td>
-                            <td style="text-align: right">{{ number_format(abs($row->paid_amount),2) }}</td>
-                            <td style="text-align: right">{{ number_format($row->total_unpaid_amount, 2, '.', ',') }}</td>
-                            <td style="text-align: right">{{ number_format(($row->paid_amount + $row->total_unpaid_amount ), 2, '.', ',') }}</td>
+                            <td style="text-align: right">{{ number_format(abs($row->opening),2) }}</td>
+                            <td style="text-align: right">{{ number_format($row->total_unpaid_amount, 2, '.', ',') }}
+                            </td>
+                            <td style="text-align: right">{{ number_format(($row->opening + $row->total_unpaid_amount ),
+                                2, '.', ',') }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -118,7 +131,7 @@
                     </tfoot>
                 </table>
                 <div>
-                    {{-- {{ $this->dues->links() }} --}}
+                    {{ $this->dues->links() }}
                 </div>
             </div>
         </div>
